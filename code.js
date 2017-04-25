@@ -91,7 +91,11 @@ Player.prototype.update = function(playerRef) {
 
 Player.prototype.draw = function(context) {
   context.fillStyle = this.fill;
-  scaleAndDrawRect(context, this.rect());
+  if (this.id){
+    scaleAndDrawRect(context, this.rect());
+  } else {
+    clearSelectedPlayer();
+  }
 };
 
 Player.prototype.drawSelection = function(context) {
@@ -137,6 +141,7 @@ Flag.prototype.update = function(flagRef) {
   this.y = flagRef.y;
   this.team = flagRef.team;
   this.id = flagRef.id;
+
   if(this.team === "red") {
     this.fill = '#bb3311';
   }
