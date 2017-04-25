@@ -90,11 +90,9 @@ Player.prototype.update = function(playerRef) {
 };
 
 Player.prototype.draw = function(context) {
-  context.fillStyle = this.fill;
-  if (this.id){
+  if (this.id) {
+    context.fillStyle = this.fill;
     scaleAndDrawRect(context, this.rect());
-  } else {
-    clearSelectedPlayer();
   }
 };
 
@@ -247,7 +245,7 @@ function CanvasState(canvas) {
     }
     // havent returned means we have failed to select anything.
     // If there was an object selected, we deselect it
-    clearSelectedPlayer();
+    clearSelectedPlayer(false);
   }, true);
 
   document.addEventListener('keydown', function(e) {
@@ -365,8 +363,8 @@ function CanvasState(canvas) {
 
         myState.valid = false;
         myState.lastMoveTime = currentTime;
-        console.log(selectedPlayer)
-        // clearSelectedPlayer();
+
+        clearSelectedPlayer(false);
       }
     }
   }, true);
@@ -634,9 +632,9 @@ $(document).ready(function () {
     init();
 });
 
-function clearSelectedPlayer () {
+function clearSelectedPlayer (valid) {
   if (window.myState.selectedPlayer) {
     window.myState.selectedPlayer = null;
-    window.myState.valid = false; // Need to clear the old selectedPlayer border
+    window.myState.valid = typeof valid === 'undefined' ? true : valid;
   }
 }
