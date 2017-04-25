@@ -224,7 +224,7 @@ function CanvasState(canvas) {
   this.redWins = false;
   this.blueWins = false;
 
-  var myState = this;
+  window.myState = this;
 
   canvas.addEventListener('mousedown', function(e) {
     var mouse = myState.getMouse(e);
@@ -244,13 +244,6 @@ function CanvasState(canvas) {
     // If there was an object selected, we deselect it
     clearSelectedPlayer();
   }, true);
-
-  function clearSelectedPlayer () {
-    if (myState.selectedPlayer) {
-      myState.selectedPlayer = null;
-      myState.valid = false; // Need to clear the old selectedPlayer border
-    }
-  }
 
   document.addEventListener('keydown', function(e) {
     // Left = 37
@@ -635,3 +628,10 @@ $(document).ready(function () {
   if(!initialized)
     init();
 });
+
+function clearSelectedPlayer () {
+  if (window.myState.selectedPlayer) {
+    window.myState.selectedPlayer = null;
+    window.myState.valid = false; // Need to clear the old selectedPlayer border
+  }
+}
