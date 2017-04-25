@@ -1,4 +1,5 @@
 function scaleAndDrawRect(context, rect) {
+  // draw passed rect to context, which is a canvas
   var canvasWidth = $('canvas').attr('width');
   var canvasHeight = $('canvas').attr('height');
   var scaledRect = scaleRect(rect);
@@ -7,6 +8,11 @@ function scaleAndDrawRect(context, rect) {
 }
 
 function Rect(x, y, w, h, fill, aspectRatio) {
+  // prototype to hold rectangular data structures
+  // coordinates x, y
+  // dimensions w, h
+  // color fill
+  // aspectRatio
   this.x = x; this.y = y;
   this.w = w; this.h = h;
   this.fill = fill;
@@ -16,6 +22,7 @@ function Rect(x, y, w, h, fill, aspectRatio) {
 }
 
 function scaleRect(rect) {
+  // function to scale rectangular to proper aspect ration
   var canvasWidth = $('canvas').attr('width');
   var canvasHeight = $('canvas').attr('height');
   var rectWidth = rect.w * canvasWidth;
@@ -30,6 +37,7 @@ function scaleRect(rect) {
 }
 
 function apparentRect(rect) {
+  // function to get actual rectangular height as it appears on the canvas
   var canvasWidth = $('canvas').attr('width');
   var canvasHeight = $('canvas').attr('height');
   var ratio = canvasWidth / canvasHeight;
@@ -38,40 +46,31 @@ function apparentRect(rect) {
 }
 
 Rect.prototype.contains = function(mx, my) {
-  return  (this.x <= mx) && (this.x + this.w >= mx) && (this.y <= my) && (this.y + this.h >= my);
+  // function to check whether rectangle is contained within this
+  return (this.x <= mx) && (this.x + this.w >= mx) && (this.y <= my) && (this.y + this.h >= my);
 };
 
 Rect.prototype.intersects = function(rect) {
+  // function to check whether rectangle is intersected with this
   return this.x < (rect.x + rect.w) &&
     (this.x + this.w) > rect.x &&
     this.y < (rect.y + rect.h) &&
     (this.y + this.h) > rect.y;
 };
 
-Rect.prototype.shrink = function(shrinkagePercentage) {
-  var shrinkageW = shrinkagePercentage * this.w;
-  var shrinkageH = shrinkagePercentage * this.h;
-  var diffX = (this.w - shrinkageW) / 2;
-  var diffY = (this.h - shrinkageH) / 2;
-  this.x += diffX;
-  this.y += diffY;
-  this.w = shrinkageW;
-  this.h = shrinkageH;
-  this.left = this.x;
-  this.right = this.x + this.w;
-  return this;
-};
-
 Rect.prototype.draw = function(context) {
+  // draw this to canvas context
   context.fillStyle = this.fill;
   context.fillRect(rect.x, rect.y, rect.w, rect.h);
 };
 
 function Player(playerRef) {
+  // sync local object to server object
   this.update(playerRef);
 }
 
 Player.prototype.update = function(playerRef) {
+  // set player attributes from server object
   this.w = 0.02;
   this.h = this.w;
   this.x = playerRef.x;
@@ -79,17 +78,14 @@ Player.prototype.update = function(playerRef) {
   this.hasEnemyFlag = playerRef.hasEnemyFlag;
   this.team = playerRef.team;
   this.id = playerRef.id;
-  if(this.team === "red") {
-    this.fill = '#bb3311';
-  }
-  else {
-    this.fill = '#1133bb';
-  }
+  if(this.team === "red") this.fill = '#bb3311';
+  else this.fill = '#1133bb';
   this.rect = function() { return new Rect(this.x, this.y, this.w, this.h, this.fill, this.h / this.w); }
   this.apparentRect = function() { return apparentRect(this.rect()); }
 };
 
 Player.prototype.draw = function(context) {
+  // function to draw player to context, if his id is present - that is, if he hasn't stepped on the mine;
   if (this.id) {
     context.fillStyle = this.fill;
     scaleAndDrawRect(context, this.rect());
@@ -97,6 +93,7 @@ Player.prototype.draw = function(context) {
 };
 
 Player.prototype.drawSelection = function(context) {
+  // function to draw player with its selection line
   context.strokeStyle = '#000000';
   context.lineWidth = 2;
   var sr = scaleRect(this.rect());
@@ -104,35 +101,26 @@ Player.prototype.drawSelection = function(context) {
 };
 
 Player.prototype.contains = function(mx, my) {
+  // function to check whether this player's apparent rectangle contains passed in coordinates
   return this.apparentRect().contains(mx, my);
 };
 
-Player.prototype.intersectsPlayer = function(otherPlayer) {
-  var r1 = this.apparentRect().shrink(0.95);
-  var r2 = otherPlayer.apparentRect().shrink(0.95);
-  return r1.intersects(r2);
-  //return this.apparentRect().shrink(1).intersects(otherPlayer.apparentRect().shrink(1));
-};
-
 Player.prototype.isInHomeArea = function() {
+  // function to check whether this player is in home area
   var rect = this.rect();
 
-  if(this.team === "red") {
-
-
-    return rect.right <= 0.1 && rect.y <= 0.1;
-  }
-  else {
-    return rect.left >= 0.9 && rect.y >= 0.9;
-  }
+  if(this.team === "red") return rect.right <= 0.1 && rect.y <= 0.1;
+  else return rect.left >= 0.9 && rect.y >= 0.9;
   return false;
 };
 
 function Flag(flagRef) {
+  // sync local object to server object
   this.update(flagRef);
 }
 
 Flag.prototype.update = function(flagRef) {
+  // set flag attributes from server object
   this.w = 0.008;
   this.h = this.w;
   this.x = flagRef.x;
@@ -140,28 +128,29 @@ Flag.prototype.update = function(flagRef) {
   this.team = flagRef.team;
   this.id = flagRef.id;
 
-  if(this.team === "red") {
-    this.fill = '#bb3311';
-  }
-  else {
-    this.fill = '#1133bb';
-  }
+  if(this.team === "red") this.fill = '#bb3311';
+  else this.fill = '#1133bb';
+
   this.rect = function() { return new Rect(this.x, this.y, this.w, this.h, this.fill, this.h / this.w); }
   this.apparentRect = function() { return apparentRect(this.rect()); }
 };
 
-Flag.prototype.draw = function(context) {
+Flag.prototype.draw = function (context) {
+  // draw this to canvas context
   context.fillStyle = this.fill;
   scaleAndDrawRect(context, this.rect());
 };
 
 Flag.prototype.contains = function(mx, my) {
+  // function to check whether this flag's apparent rectangle contains passed in coordinates
   return this.apparentRect().contains(mx, my);
 };
 function Mine(mineRef) {
+  // just do it
   this.update(mineRef);
 }
 Mine.prototype.update = function(mineRef) {
+  // set them mines attributes
   this.w = 0.008;
   this.h = this.w;
   this.x = mineRef.x;
@@ -182,11 +171,13 @@ Mine.prototype.update = function(mineRef) {
 };
 
 Mine.prototype.draw = function(context) {
+  // draw this to canvas context
   context.fillStyle = this.fill;
   scaleAndDrawRect(context, this.rect());
 };
 
 Mine.prototype.contains = function(mx, my) {
+  // function to check whether this mine's apparent rectangle contains passed in coordinates
   return this.apparentRect().contains(mx, my);
 };
 
@@ -248,6 +239,7 @@ function CanvasState(canvas) {
     clearSelectedPlayer(false);
   }, true);
 
+  // listen for arrow key presses
   document.addEventListener('keydown', function(e) {
     // Left = 37
     // Up = 38
@@ -270,8 +262,7 @@ function CanvasState(canvas) {
           enemyFlag = myState.getFlag("0");
         }
 
-
-
+        // set movement positions
         if(e.keyCode === 37) {
           selectedPlayer.x = selectedPlayer.x - width;
           e.preventDefault();
@@ -289,6 +280,7 @@ function CanvasState(canvas) {
           e.preventDefault();
         }
 
+        // if player has flag and is in home area - the team wins
         if(selectedPlayer.hasEnemyFlag && selectedPlayer.isInHomeArea()) {
           if(selectedPlayer.team === "red") {
             myState.redWins = true;
@@ -298,6 +290,7 @@ function CanvasState(canvas) {
           }
         }
 
+        // if player stepped on the mine - set their id to null
         for(var i=0; i < mines.length; i++){
           if(selectedPlayer.apparentRect().intersects(mines[i].apparentRect())){
             selectedPlayer.id = null;
@@ -309,34 +302,7 @@ function CanvasState(canvas) {
         }
 
         var updatedOtherPlayer = null;
-
-        // Tag enemy players
-        for(var i = 0; i < players.length; i++) {
-          var otherPlayer = players[i];
-          if(otherPlayer.team !== selectedPlayer.team && selectedPlayer.intersectsPlayer(otherPlayer)) {
-            var home = selectedPlayer.isInHomeArea();
-            if(!selectedPlayer.isInHomeArea()) {
-              selectedPlayer.hasEnemyFlag = false;
-              if(selectedPlayer.team === "red") {
-                selectedPlayer.x = 0.1;
-              }
-              else {
-                selectedPlayer.x = 0.9;
-              }
-            }
-            else if(!otherPlayer.isInHomeArea()) {
-              otherPlayer.hasEnemyFlag = false;
-              if(otherPlayer.team === "red") {
-                otherPlayer.x = 0.1;
-              }
-              else {
-                otherPlayer.x = 0.9;
-              }
-              updatedOtherPlayer = jQuery.extend({}, otherPlayer);
-            }
-          }
-        }
-
+        // send new state to server
         var playerRef = new Firebase("https://capture-the-flag.firebaseio.com/players/" + selectedPlayer.id);
         playerRef.set({id: selectedPlayer.id,
           team: selectedPlayer.team,
@@ -364,6 +330,7 @@ function CanvasState(canvas) {
         myState.valid = false;
         myState.lastMoveTime = currentTime;
 
+        // clear selected player for the next move
         clearSelectedPlayer(false);
       }
     }
