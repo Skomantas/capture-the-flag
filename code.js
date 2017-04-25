@@ -113,13 +113,14 @@ Player.prototype.intersectsPlayer = function(otherPlayer) {
 };
 
 Player.prototype.isInHomeArea = function() {
+  var rect = this.rect();
+
   if(this.team === "red") {
-    return this.rect().right <= 0.5;
+    console.log(this.rect())
+    return rect.right <= 0.1 && rect.y <= 0.1;
   }
   else {
-    var r = this.rect();
-    var l = r.left;
-    return this.rect().left >= 0.5;
+    return rect.left >= 0.9 && rect.y >= 0.9;
   }
   return false;
 };
@@ -237,11 +238,15 @@ function CanvasState(canvas) {
     }
     // havent returned means we have failed to select anything.
     // If there was an object selected, we deselect it
+    clearSelectedPlayer();
+  }, true);
+
+  function clearSelectedPlayer () {
     if (myState.selectedPlayer) {
       myState.selectedPlayer = null;
       myState.valid = false; // Need to clear the old selectedPlayer border
     }
-  }, true);
+  }
 
   document.addEventListener('keydown', function(e) {
     // Left = 37
@@ -350,6 +355,8 @@ function CanvasState(canvas) {
 
         myState.valid = false;
         myState.lastMoveTime = currentTime;
+
+        // clearSelectedPlayer();
       }
     }
   }, true);
@@ -591,7 +598,7 @@ function init() {
   $('.reset').bind('click', function() {
     s.redWins = false;
     s.blueWins = false;
-    json = { "players": [ { "id": "0", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "1", "team": "red", "x": 0.1, "y": 0.5, "hasEnemyFlag": false }, { "id": "2", "team": "red", "x": 0.1, "y": 0.9, "hasEnemyFlag": false }, { "id": "3", "team": "blue", "x": 0.9, "y": 0.1, "hasEnemyFlag": false }, { "id": "4", "team": "blue", "x": 0.9, "y": 0.5, "hasEnemyFlag": false }, { "id": "5", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false } ], "flags": [ { "id": "0", "team": "red", "x": 0.05, "y": 0.5 }, { "id": "1", "team": "blue", "x": 0.95, "y": 0.5 } ] };
+    json = { "players": [ { "id": "0", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "1", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "2", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "3", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false }, { "id": "4", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false }, { "id": "5", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false } ], "flags": [ { "id": "0", "team": "red", "x": 0.05, "y": 0.5 }, { "id": "1", "team": "blue", "x": 0.95, "y": 0.5 } ] };
     var fb = new Firebase("https://capture-the-flag.firebaseio.com/");
     fb.set(json);
   });
