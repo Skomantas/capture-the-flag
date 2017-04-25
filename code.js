@@ -572,8 +572,8 @@ function initializeMines(s) {
     var mine = {
       "id": i.toString(),
       "team": "none",
-      "x": getRandomArbitrary(0.01,99.9),
-      "y": getRandomArbitrary(0.01,99.9)
+      "x": getRandomArbitrary(0.01,0.99),
+      "y": getRandomArbitrary(0.01,0.99)
     };
 
     if(s.hasMine(mine)) {
