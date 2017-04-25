@@ -153,7 +153,9 @@ Flag.prototype.draw = function(context) {
 Flag.prototype.contains = function(mx, my) {
   return this.apparentRect().contains(mx, my);
 };
-
+function Mine(mineRef) {
+  this.update(mineRef);
+}
 Mine.prototype.update = function(mineRef) {
   this.w = 0.008;
   this.h = this.w;
@@ -163,6 +165,9 @@ Mine.prototype.update = function(mineRef) {
   this.id = mineRef.id;
   if(this.team === "red") {
     this.fill = '#bb3311';
+  }
+  if(this.team === "none") {
+    this.fill = '#000000';
   }
   else {
     this.fill = '#1133bb';
@@ -453,6 +458,7 @@ CanvasState.prototype.draw = function() {
   if(!this.valid) {
     var context = this.context;
     var flags = this.flags;
+    var mines = this.mines;
     var players = this.players;
     this.clear();
 
