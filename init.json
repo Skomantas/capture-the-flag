@@ -11,28 +11,28 @@
         "id": "1",
         "team": "red",
         "x": 0.1,
-        "y": 0.5,
+        "y": 0.1,
         "hasEnemyFlag": false
     },
     {
         "id": "2",
         "team": "red",
         "x": 0.1,
-        "y": 0.9,
+        "y": 0.1,
         "hasEnemyFlag": false
     },
     {
         "id": "3",
         "team": "blue",
         "x": 0.9,
-        "y": 0.1,
+        "y": 0.9,
         "hasEnemyFlag": false
     },
     {
         "id": "4",
         "team": "blue",
         "x": 0.9,
-        "y": 0.5,
+        "y": 0.9,
         "hasEnemyFlag": false
     },
     {
@@ -56,5 +56,5 @@
         "x": 0.95,
         "y": 0.5
     }
-    ]
+    ],
 }

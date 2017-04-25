@@ -39,14 +39,14 @@ function apparentRect(rect) {
 
 Rect.prototype.contains = function(mx, my) {
   return  (this.x <= mx) && (this.x + this.w >= mx) && (this.y <= my) && (this.y + this.h >= my);
-}
+};
 
 Rect.prototype.intersects = function(rect) {
   return this.x < (rect.x + rect.w) &&
     (this.x + this.w) > rect.x &&
     this.y < (rect.y + rect.h) &&
     (this.y + this.h) > rect.y;
-}
+};
 
 Rect.prototype.shrink = function(shrinkagePercentage) {
   var shrinkageW = shrinkagePercentage * this.w;
@@ -60,12 +60,12 @@ Rect.prototype.shrink = function(shrinkagePercentage) {
   this.left = this.x;
   this.right = this.x + this.w;
   return this;
-}
+};
 
 Rect.prototype.draw = function(context) {
   context.fillStyle = this.fill;
   context.fillRect(rect.x, rect.y, rect.w, rect.h);
-}
+};
 
 function Player(playerRef) {
   this.update(playerRef);
@@ -87,30 +87,30 @@ Player.prototype.update = function(playerRef) {
   }
   this.rect = function() { return new Rect(this.x, this.y, this.w, this.h, this.fill, this.h / this.w); }
   this.apparentRect = function() { return apparentRect(this.rect()); }
-}
+};
 
 Player.prototype.draw = function(context) {
   context.fillStyle = this.fill;
   scaleAndDrawRect(context, this.rect());
-}
+};
 
 Player.prototype.drawSelection = function(context) {
   context.strokeStyle = '#000000';
   context.lineWidth = 2;
   var sr = scaleRect(this.rect());
   context.strokeRect(sr.x,sr.y,sr.w,sr.h);
-}
+};
 
 Player.prototype.contains = function(mx, my) {
   return this.apparentRect().contains(mx, my);
-}
+};
 
 Player.prototype.intersectsPlayer = function(otherPlayer) {
   var r1 = this.apparentRect().shrink(0.95);
   var r2 = otherPlayer.apparentRect().shrink(0.95);
   return r1.intersects(r2);
   //return this.apparentRect().shrink(1).intersects(otherPlayer.apparentRect().shrink(1));
-}
+};
 
 Player.prototype.isInHomeArea = function() {
   if(this.team === "red") {
@@ -122,7 +122,7 @@ Player.prototype.isInHomeArea = function() {
     return this.rect().left >= 0.5;
   }
   return false;
-}
+};
 
 function Flag(flagRef) {
   this.update(flagRef);
@@ -143,16 +143,42 @@ Flag.prototype.update = function(flagRef) {
   }
   this.rect = function() { return new Rect(this.x, this.y, this.w, this.h, this.fill, this.h / this.w); }
   this.apparentRect = function() { return apparentRect(this.rect()); }
-}
+};
 
 Flag.prototype.draw = function(context) {
   context.fillStyle = this.fill;
   scaleAndDrawRect(context, this.rect());
-}
+};
 
 Flag.prototype.contains = function(mx, my) {
   return this.apparentRect().contains(mx, my);
-}
+};
+
+Mine.prototype.update = function(mineRef) {
+  this.w = 0.008;
+  this.h = this.w;
+  this.x = mineRef.x;
+  this.y = mineRef.y;
+  this.team = mineRef.team;
+  this.id = mineRef.id;
+  if(this.team === "red") {
+    this.fill = '#bb3311';
+  }
+  else {
+    this.fill = '#1133bb';
+  }
+  this.rect = function() { return new Rect(this.x, this.y, this.w, this.h, this.fill, this.h / this.w); }
+  this.apparentRect = function() { return apparentRect(this.rect()); }
+};
+
+Mine.prototype.draw = function(context) {
+  context.fillStyle = this.fill;
+  scaleAndDrawRect(context, this.rect());
+};
+
+Mine.prototype.contains = function(mx, my) {
+  return this.apparentRect().contains(mx, my);
+};
 
 function CanvasState(canvas) {
   this.canvas = canvas;
@@ -181,6 +207,7 @@ function CanvasState(canvas) {
   this.valid = false; // when set to false, the canvas will redraw everything
   this.flags = [];
   this.players = [];
+  this.mines = [];
   this.line = new Rect(0.495, 0, 0.005, 1, '#dddd11');
   this.selectedPlayer = null;
   this.lastMoveTime = 0;
@@ -334,7 +361,16 @@ CanvasState.prototype.hasFlag = function(flag) {
     }
   }
   return false;
-}
+};
+
+CanvasState.prototype.hasMine = function(mine) {
+  for(var i = 0; i < this.mines.length; i++) {
+    if(this.mines[i].id === mine.id) {
+      return true;
+    }
+  }
+  return false;
+};
 
 CanvasState.prototype.getFlag = function(flagId) {
   for(var i = 0; i < this.flags.length; i++) {
@@ -343,17 +379,36 @@ CanvasState.prototype.getFlag = function(flagId) {
     }
   }
   return null;
-}
+};
+
+CanvasState.prototype.getMine = function(mineId) {
+  for(var i = 0; i < this.mines.length; i++) {
+    if(this.mines[i].id === mineId) {
+      return this.mines[i];
+    }
+  }
+  return null;
+};
 
 CanvasState.prototype.addFlag = function(flag) {
   this.flags.push(flag);
   this.valid = false;
-}
+};
+
+CanvasState.prototype.addMine = function(mine) {
+  this.mines.push(mine);
+  this.valid = false;
+};
 
 CanvasState.prototype.updateFlag = function(firebaseFlagRef) {
   this.getFlag(firebaseFlagRef.id).update(firebaseFlagRef);
   this.valid = false;
-}
+};
+
+CanvasState.prototype.updateMine = function(firebaseMineRef) {
+  this.getFlag(firebaseMineRef.id).update(firebaseMineRef);
+  this.valid = false;
+};
 
 CanvasState.prototype.hasPlayer = function(player) {
   for(var i = 0; i < this.players.length; i++) {
@@ -362,7 +417,7 @@ CanvasState.prototype.hasPlayer = function(player) {
     }
   }
   return false;
-}
+};
 
 CanvasState.prototype.getPlayer = function(playerId) {
   for(var i = 0; i < this.players.length; i++) {
@@ -371,26 +426,28 @@ CanvasState.prototype.getPlayer = function(playerId) {
     }
   }
   return null;
-}
+};
 
 CanvasState.prototype.addPlayer = function(player) {
   this.players.push(player);
   this.valid = false;
-}
+};
 
 CanvasState.prototype.updatePlayer = function(firebasePlayerRef) {
   this.getPlayer(firebasePlayerRef.id).update(firebasePlayerRef);
   this.valid = false;
-}
+};
 
 CanvasState.prototype.addFlag = function(flag) {
   this.flags.push(flag);
   this.valid = false;
-}
+};
+
+
 
 CanvasState.prototype.clear = function() {
   this.context.clearRect(0, 0, this.width, this.height);
-}
+};
 
 CanvasState.prototype.draw = function() {
   if(!this.valid) {
@@ -415,6 +472,10 @@ CanvasState.prototype.draw = function() {
     for (var i = 0; i < l; i++) {
       flags[i].draw(context);
     }
+    var l = mines.length;
+    for (var i = 0; i < l; i++) {
+      mines[i].draw(context);
+    }
 
     if(this.redWins) {
       context.fillStyle = "red";
@@ -433,7 +494,7 @@ CanvasState.prototype.draw = function() {
 
     this.valid = true;
   }
-}
+};
 
 CanvasState.prototype.getMouse = function(e) {
   var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
@@ -459,7 +520,7 @@ CanvasState.prototype.getMouse = function(e) {
 
   // We return a simple javascript object (a hash) with x and y defined
   return {x: mx, y: my};
-}
+};
 
 function initializePlayers(firebasePlayers, s) {
   if(!firebasePlayers) { return; }
@@ -489,6 +550,27 @@ function initializeFlags(firebaseFlags, s) {
   }
 }
 
+function getRandomArbitrary(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function initializeMines(s) {
+  for(var i = 0; i < 6; i++) {
+    var mine = {
+      "id": i.toString(),
+      "team": "none",
+      "x": getRandomArbitrary(0.01,99.9),
+      "y": getRandomArbitrary(0.01,99.9)
+    };
+    if(s.hasMine(mine)) {
+      s.updateMine(mine);
+    }
+    else {
+      s.addMine(new Flag(firebaseFlag));
+    }
+  }
+}
+
 function init() {
   var fb = new Firebase("https://capture-the-flag.firebaseio.com/");
   var s = new CanvasState(document.getElementById('canvas'));
@@ -496,6 +578,7 @@ function init() {
   fb.on('value', function(snapshot) {
     initializePlayers(snapshot.val().players, s);
     initializeFlags(snapshot.val().flags, s);
+    initializeMines(s);
   });
 
   $('.reset').bind('click', function() {
