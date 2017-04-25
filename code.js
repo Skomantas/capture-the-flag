@@ -566,7 +566,7 @@ function initializeMines(s) {
       s.updateMine(mine);
     }
     else {
-      s.addMine(new Flag(firebaseFlag));
+      s.addMine(new Mine(mine));
     }
   }
 }
