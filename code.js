@@ -116,7 +116,7 @@ Player.prototype.isInHomeArea = function() {
   var rect = this.rect();
 
   if(this.team === "red") {
-    console.log(this.rect())
+    console.log(this.rect());
     return rect.right <= 0.1 && rect.y <= 0.1;
   }
   else {
@@ -258,6 +258,7 @@ function CanvasState(canvas) {
       if(currentTime - myState.lastMoveTime > 100) {
         var selectedPlayer = myState.selectedPlayer;
         var players = myState.players;
+        var mines = myState.mines;
         var width = selectedPlayer.w;
         var height = selectedPlayer.h;
         var enemyFlag = null;
@@ -268,6 +269,8 @@ function CanvasState(canvas) {
         else {
           enemyFlag = myState.getFlag("0");
         }
+
+
 
         if(e.keyCode === 37) {
           selectedPlayer.x = selectedPlayer.x - width;
@@ -295,6 +298,11 @@ function CanvasState(canvas) {
           }
         }
 
+        for(var i=0; i < mines.length; i++){
+          if(selectedPlayer.apparentRect().intersects(mines[i].apparentRect())){
+            selectedPlayer.id = null;
+          }
+        }
         // Grab flag
         if(!selectedPlayer.hasEnemyFlag && selectedPlayer.apparentRect().intersects(enemyFlag.apparentRect())) {
           selectedPlayer.hasEnemyFlag = true;
@@ -355,7 +363,7 @@ function CanvasState(canvas) {
 
         myState.valid = false;
         myState.lastMoveTime = currentTime;
-
+        console.log(selectedPlayer)
         // clearSelectedPlayer();
       }
     }
@@ -586,6 +594,7 @@ function initializeMines(s) {
 }
 
 function init() {
+
   var fb = new Firebase("https://capture-the-flag.firebaseio.com/");
   var s = new CanvasState(document.getElementById('canvas'));
 
@@ -598,7 +607,16 @@ function init() {
   $('.reset').bind('click', function() {
     s.redWins = false;
     s.blueWins = false;
-    json = { "players": [ { "id": "0", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "1", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "2", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false }, { "id": "3", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false }, { "id": "4", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false }, { "id": "5", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false } ], "flags": [ { "id": "0", "team": "red", "x": 0.05, "y": 0.5 }, { "id": "1", "team": "blue", "x": 0.95, "y": 0.5 } ] };
+    json = { "players": [
+      { "id": "0", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false, "is_dead": false},
+      { "id": "1", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false, "is_dead": false },
+      { "id": "2", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false, "is_dead": false },
+      { "id": "3", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false, "is_dead": false },
+      { "id": "4", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false, "is_dead": false },
+      { "id": "5", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false, "is_dead": false } ],
+    "flags": [
+    { "id": "0", "team": "red", "x": 0.05, "y": 0.5 },
+    { "id": "1", "team": "blue", "x": 0.95, "y": 0.5 } ] };
     var fb = new Firebase("https://capture-the-flag.firebaseio.com/");
     fb.set(json);
   });
