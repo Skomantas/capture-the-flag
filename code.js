@@ -116,7 +116,8 @@ Player.prototype.isInHomeArea = function() {
   var rect = this.rect();
 
   if(this.team === "red") {
-    console.log(this.rect());
+
+
     return rect.right <= 0.1 && rect.y <= 0.1;
   }
   else {
@@ -214,7 +215,10 @@ function CanvasState(canvas) {
   this.flags = [];
   this.players = [];
   this.mines = [];
-  this.line = new Rect(0.495, 0, 0.005, 1, '#dddd11');
+  this.line = new Rect(0.1, 0, 0.005, 0.1, '#dddd11');
+  this.line1 = new Rect(0, 0.1, 0.1, 0.005, '#dddd11');
+  this.line2 = new Rect(0.9, 0.9, 0.005, 0.1, '#dddd11');
+  this.line3 = new Rect(0.9, 0.9, 0.1, 0.005, '#dddd11');
   this.selectedPlayer = null;
   this.lastMoveTime = 0;
   this.redWins = false;
@@ -481,9 +485,18 @@ CanvasState.prototype.draw = function() {
 
     // Draw all items
 
-    // Draw middle line
+    // Draw base boundaries
     context.fillStyle = this.line.fill;
     scaleAndDrawRect(context, this.line);
+
+    context.fillStyle = this.line1.fill;
+    scaleAndDrawRect(context, this.line1);
+
+    context.fillStyle = this.line2.fill;
+    scaleAndDrawRect(context, this.line2);
+
+    context.fillStyle = this.line3.fill;
+    scaleAndDrawRect(context, this.line3);
 
     var l = players.length;
     for (var i = 0; i < l; i++) {
@@ -572,7 +585,7 @@ function initializeFlags(firebaseFlags, s) {
 }
 
 function getRandomArbitrary(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
+  return parseFloat((Math.random() * (min - max) + max).toFixed(4));
 }
 
 function initializeMines(s) {
@@ -598,25 +611,18 @@ function init() {
   var fb = new Firebase("https://capture-the-flag.firebaseio.com/");
   var s = new CanvasState(document.getElementById('canvas'));
 
+  initializeMines(s);
+
   fb.on('value', function(snapshot) {
     initializePlayers(snapshot.val().players, s);
     initializeFlags(snapshot.val().flags, s);
-    initializeMines(s);
   });
 
   $('.reset').bind('click', function() {
     s.redWins = false;
     s.blueWins = false;
-    json = { "players": [
-      { "id": "0", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false, "is_dead": false},
-      { "id": "1", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false, "is_dead": false },
-      { "id": "2", "team": "red", "x": 0.1, "y": 0.1, "hasEnemyFlag": false, "is_dead": false },
-      { "id": "3", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false, "is_dead": false },
-      { "id": "4", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false, "is_dead": false },
-      { "id": "5", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false, "is_dead": false } ],
-    "flags": [
-    { "id": "0", "team": "red", "x": 0.05, "y": 0.5 },
-    { "id": "1", "team": "blue", "x": 0.95, "y": 0.5 } ] };
+
+    json = { "players": [ { "id": "0", "team": "red", "x": 0.08, "y": 0.08, "hasEnemyFlag": false }, { "id": "1", "team": "red", "x": 0.08, "y": 0.08, "hasEnemyFlag": false }, { "id": "2", "team": "red", "x": 0.08, "y": 0.08, "hasEnemyFlag": false }, { "id": "3", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false }, { "id": "4", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false }, { "id": "5", "team": "blue", "x": 0.9, "y": 0.9, "hasEnemyFlag": false } ], "flags": [ { "id": "0", "team": "red", "x": getRandomArbitrary(0.1,0.9), "y": getRandomArbitrary(0.1,0.9) }, { "id": "1", "team": "blue", "x": getRandomArbitrary(0.1,0.9), "y": getRandomArbitrary(0.1,0.9) } ] };
     var fb = new Firebase("https://capture-the-flag.firebaseio.com/");
     fb.set(json);
   });
