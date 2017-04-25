@@ -411,7 +411,7 @@ CanvasState.prototype.updateFlag = function(firebaseFlagRef) {
 };
 
 CanvasState.prototype.updateMine = function(firebaseMineRef) {
-  this.getFlag(firebaseMineRef.id).update(firebaseMineRef);
+  this.getMine(firebaseMineRef.id).update(firebaseMineRef);
   this.valid = false;
 };
 
@@ -568,6 +568,7 @@ function initializeMines(s) {
       "x": getRandomArbitrary(0.01,99.9),
       "y": getRandomArbitrary(0.01,99.9)
     };
+
     if(s.hasMine(mine)) {
       s.updateMine(mine);
     }
